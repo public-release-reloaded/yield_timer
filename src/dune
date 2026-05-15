@@ -1,0 +1,7 @@
+(library
+ (name yield_timer)
+ (public_name yield_timer)
+ (libraries core async_kernel async_kernel.eager_deferred
+   pipe_with_writer_error)
+ (preprocess
+  (pps ppx_jane)))

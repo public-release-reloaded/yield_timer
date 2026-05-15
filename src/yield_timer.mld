@@ -1,0 +1,8 @@
+{0 Yield_timer}
+
+[Yield_timer] is a single-module library intended to make it easier for
+functions that perform long synchronous tasks to behave nicely with Async, by
+providing an easy way to periodically call a [yield] function within some
+iterator.
+
+{b {{!Yield_timer} The full API is browsable here}}.
