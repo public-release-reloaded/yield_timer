@@ -11,7 +11,7 @@ build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocaml" {>= "5.1.0"}
+  "ocaml" {>= "5.5.0"}
   "async_kernel"
   "core"
   "pipe_with_writer_error"
