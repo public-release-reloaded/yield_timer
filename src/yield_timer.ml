@@ -171,15 +171,36 @@ struct
       let iter t map ~f = fold t map ~f:(fun ~key ~data () -> f ~key ~data) ~init:()
       let iter' t map ~f = fold' t map ~f:(fun ~key ~data () -> f ~key ~data) ~init:()
 
-      let merge t ~how:`Sequential map1 map2 ~f =
-        filter_mapi
-          t
-          (Map.merge map1 map2 ~f:(fun ~key z -> Some (fun () -> f ~key z)))
-          ~f:(fun ~key:_ ~data -> data ())
+      let merge_sequenced ?(order = `Increasing_key) map1 map2 =
+        let seq1 = Map.to_sequence ~order map1 in
+        let seq2 = Map.to_sequence ~order map2 in
+        let compare =
+          let compare = Comparator.compare (Map.comparator map1) in
+          match order with
+          | `Increasing_key -> compare
+          | `Decreasing_key -> Comparable.compare_reversed compare
+        in
+        Core.Sequence.merge_with_duplicates seq1 seq2 ~compare:(fun (key1, _) (key2, _) ->
+          compare key1 key2)
+        |> Core.Sequence.map ~f:(function
+          | Left (key, l) -> key, `Left l
+          | Right (key, r) -> key, `Right r
+          | Both ((key, l), (_, r)) -> key, `Both (l, r))
       ;;
 
-      let merge' t ~how:`Sequential map1 map2 ~f =
-        merge t ~how:`Sequential map1 map2 ~f:(fun ~key values -> return (f ~key values))
+      let merge t ~how:`Sequential map1 map2 ~f =
+        let empty_map = Map.empty (Map.comparator_s map1) in
+        merge_sequenced map1 map2
+        |> Sequence.fold t ~init:empty_map ~f:(fun acc (key, merge_element) ->
+          match%map f ~key merge_element with
+          | None -> acc
+          | Some data -> Map.add_exn acc ~key ~data)
+      ;;
+
+      (* As in [Sequence.fold'] above, we don't reimplement this explicitly. *)
+      let merge' t ~how map1 map2 ~f =
+        merge t ~how map1 map2 ~f:(fun ~key merge_element ->
+          return (f ~key merge_element))
       ;;
 
       let transpose_keys t (m : _ Comparator.Module.t) map =

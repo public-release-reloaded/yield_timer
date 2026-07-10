@@ -207,6 +207,18 @@ module type S = sig
       -> f:(key:'k -> ('v1, 'v2) Map.Merge_element.t -> 'v3 option)
       -> ('k, 'v3, 'cmp) Map_intf.Map.t Monad.t
 
+    (** [merge_sequenced] merges two maps into a sequence. It returns the sequence in
+        constant time and doesn't use a yield timer. It's a building block for [merge],
+        but is also useful on its own.
+
+        It lives here rather than in [Base]/[Core] since it's a composition of existing
+        [Base] functions. It was considered too specific to add there. *)
+    val merge_sequenced
+      :  ?order:[ `Increasing_key | `Decreasing_key ]
+      -> ('k, 'v1, 'cmp) Map_intf.Map.t
+      -> ('k, 'v2, 'cmp) Map_intf.Map.t
+      -> ('k * ('v1, 'v2) Map.Merge_element.t) Core.Sequence.t
+
     val transpose_keys
       :  t
       -> ('a, 'b) Comparator.Module.t
