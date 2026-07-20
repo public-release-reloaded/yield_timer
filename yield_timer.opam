@@ -12,11 +12,11 @@ build: [
 ]
 depends: [
   "ocaml" {>= "5.5.0"}
-  "async_kernel"
-  "core"
-  "pipe_with_writer_error"
-  "ppx_jane"
-  "dune"                   {>= "3.17.0"}
+  "async_kernel" {>= "v0.18~" & < "v0.19~"}
+  "core" {>= "v0.18~" & < "v0.19~"}
+  "pipe_with_writer_error" {>= "v0.18~" & < "v0.19~"}
+  "ppx_jane" {>= "v0.18~" & < "v0.19~"}
+  "dune" {>= "3.17.0"}
 ]
 available: arch != "x86_32"
 synopsis: "Helpers for periodically yielding control to Async during long synchronous tasks"
